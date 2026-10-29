@@ -62,7 +62,7 @@ function setLang(l){LANG=l==='es'?'es':'en';store.set('jonahLang',LANG);window._
 const IMG={};
 const C=document.getElementById('c'),X=C.getContext('2d'),UI=document.getElementById('ui'),MSG=document.getElementById('msg');
 
-const W=320;let H=180;let level='title',t=0,state={};
+let W=320,OX=0,SL=0,SR=0,ZM=1.3;let H=180;let level='title',t=0,state={};
 function R(x,y,w,h,c){X.fillStyle=c;X.fillRect(x,y,w,h)}
 function txt(s,x,y,sz,c,al,mw){sz=sz||10;const F=z=>X.font='bold '+z+'px "Trebuchet MS",Verdana,sans-serif';F(sz);mw=mw||W-12;const tw=X.measureText(s).width;if(tw>mw){sz=sz*mw/tw;F(sz)}X.textAlign=al||'center';X.lineJoin='round';X.lineWidth=Math.max(2,sz/4);X.strokeStyle='#2b1a10';X.strokeText(s,x,y);X.fillStyle=c||'#fff';X.fillText(s,x,y)}
 // Fade-to-black transitions. While fading, the overlay swallows taps (no double transitions) and voices wait for the fade-in.
@@ -76,11 +76,11 @@ const BUB=document.getElementById('bub');let bubAt=null,bubTimer=null;
 function bubble(who,text,ref,at,ms,pos){BUB.dataset.pos=pos||'';clearTimeout(bubTimer);if(!text){BUB.style.display='none';bubAt=null;return}
  BUB.innerHTML=(who?'<div class="who">'+who+'</div>':'')+'<div class="q">'+text+'</div>'+(ref?'<div class="ref">'+ref+'</div>':'')+'<div class="tail"></div><div class="tail2"></div>';
  bubAt=at||null;BUB.classList.toggle('narr',!at);BUB.style.display='block';placeBubble();if(ms)bubTimer=setTimeout(()=>bubble(),ms)}
-function placeBubble(){if(BUB.style.display!=='block')return;try{const r=C.getBoundingClientRect(),sc=r.width/W;
+function placeBubble(){if(BUB.style.display!=='block')return;try{const r0=C.getBoundingClientRect(),sc=r0.width/W,r=window.__safe||r0;
  const tr=BUB.dataset.pos==='tr';const kk=uiK();BUB.style.fontSize=Math.max(14,Math.round((tr?24:Math.max(28,Math.round(r.width*.031/kk)))*kk))+'px';BUB.style.borderWidth=Math.max(3,Math.round(6*kk))+'px';BUB.style.maxWidth=Math.round(r.width*(tr?.42:.66))+'px';BUB.style.padding=(tr?[10,18,8]:[14,26,12]).map(v=>Math.round(v*kk)+'px').join(' ');BUB.style.borderRadius=tr?'20px':'';const bw=BUB.offsetWidth,bh=BUB.offsetHeight;let L,T;
  if(tr){L=r.right-bw-12;T=r.top+Math.max(100*kk,r.height*.15)}
  else if(!bubAt){L=r.left+(r.width-bw)/2;T=r.top+r.height*(level==='end'?.31:.2)}
- else{const p=bubAt(),px=r.left+p[0]*sc,py=r.top+p[1]*sc;T=Math.max(r.top+8,py-40*kk-bh);L=Math.max(r.left+8,Math.min(r.right-bw-8,px-bw/2));BUB.style.setProperty('--tx',Math.max(34,Math.min(bw-34,px-L))+'px')}
+ else{const p=bubAt(),px=r0.left+p[0]*sc,py=r0.top+p[1]*sc;T=Math.max(r.top+8,py-40*kk-bh);L=Math.max(r.left+8,Math.min(r.right-bw-8,px-bw/2));BUB.style.setProperty('--tx',Math.max(34,Math.min(bw-34,px-L))+'px')}
  BUB.style.left=L+'px';BUB.style.top=T+'px'}catch(e){}}
 function scaleCss(c){const o={};for(const k in c){const v=c[k];o[k]=typeof v==='string'&&/\dpx/.test(v)&&k!=='transform'?v.replace(/(\d+(?:\.\d+)?)px/g,(m,n)=>'calc('+n+'px*var(--k))'):v}return o}
 function btn(label,cls,css,fn){const b=document.createElement('button');b.className='btn '+(cls||'');b.innerHTML=label;Object.assign(b.style,scaleCss(css));
@@ -90,7 +90,7 @@ function holdBtn(label,css,key){const b=btn(label,'',css,()=>{});const on=e=>{e.
  b.addEventListener('touchstart',on,{passive:false});b.addEventListener('mousedown',on);['touchend','touchcancel','mouseup','mouseleave'].forEach(v=>b.addEventListener(v,off));return b}
 // image helpers: draw sprite by height, anchored bottom-center
 function sp(n,cx,by,h,flip,alpha){const i=IMG[n],w=i.width*h/i.height;X.save();if(alpha!=null)X.globalAlpha=alpha;X.translate(cx,by);if(flip)X.scale(-1,1);X.drawImage(i,-w/2,-h,w,h);X.restore()}
-function full(n){const i=IMG[n];X.save();X.filter='blur(6px) brightness(.6)';const s0=Math.max(W/i.width,H/i.height);X.drawImage(i,(W-i.width*s0)/2,(H-i.height*s0)/2,i.width*s0,i.height*s0);X.restore();const s=Math.min(W/i.width,H/i.height),w=i.width*s,h=i.height*s;X.drawImage(i,(W-w)/2,(H-h)/2,w,h)}
+function FS(i){return Math.min(Math.max(W/i.width,H/i.height),Math.min(W/i.width,H/i.height)*ZM)}function full(n){const i=IMG[n];X.save();X.filter='blur(5px) brightness(.8) saturate(1.1)';const s0=Math.max(W/i.width,H/i.height);X.drawImage(i,(W-i.width*s0)/2,(H-i.height*s0)/2,i.width*s0,i.height*s0);X.restore();const s=FS(i),w=i.width*s,h=i.height*s,x0=(W-w)/2,y0=(H-h)/2;X.drawImage(i,x0,y0,w,h);if(w<W-1){const f=Math.min(14,(W-w)/2);for(const[sx,dir]of[[x0,1],[x0+w,-1]]){const g=X.createLinearGradient(sx,0,sx+dir*f,0);g.addColorStop(0,'rgba(0,0,0,.35)');g.addColorStop(1,'rgba(0,0,0,0)');X.fillStyle=g;X.fillRect(Math.min(sx,sx+dir*f),0,f,H)}}}
 function cover(n,fy){const i=IMG[n],s=Math.max(W/i.width,H/i.height),w=i.width*s,h=i.height*s;X.drawImage(i,(W-w)/2,(H-h)*(fy==null?.5:fy),w,h)}
 function tileX(n,y,h,off,mirror){const i=IMG[n],w=i.width*h/i.height;let x=-(((off%(w*2))+w*2)%(w*2));let k=0;
  while(x<W){if(mirror&&k%2){X.save();X.translate(x+w,y);X.scale(-1,1);X.drawImage(i,0,0,w+.5,h);X.restore()}else X.drawImage(i,x,y,w+.5,h);x+=w;k++}}
@@ -145,7 +145,7 @@ const Snd=(()=>{let ac=null,master=null,musicBus=null,muted=store.get('jonahMute
 function title(){clearUI();level='title';Snd.music('run');
  btn(T('▶ Play','▶ Jugar'),'green',{left:'50%',top:'64%',transform:'translateX(-50%)',fontSize:'40px',padding:'16px 50px'},()=>fadeTo(startSelect));
  btn(LANG==='es'?'🇺🇸 English':'🇲🇽 Español','blue',{left:'3%',bottom:'5%',fontSize:'26px'},()=>{setLang(LANG==='es'?'en':'es');title()});}
-function drawTitle(){full('fish_full');shade(.15);txt(T("Jonah's Journey",'El viaje de Jonás'),160,34,26,'#f2c14e');txt(T('Run • Storm • Pray • Mercy','Corre • Tormenta • Ora • Misericordia'),160,52,10,'#fff');
+function drawTitle(){full('fish_full');shade(.15);txt(T("Jonah's Journey",'El viaje de Jonás'),W/2,34,26,'#f2c14e');txt(T('Run • Storm • Pray • Mercy','Corre • Tormenta • Ora • Misericordia'),W/2,52,10,'#fff');
 }
 
 // ---- Companion kids (body = Jonah pose cut-out, head drawn in code; face is a separate layer) ----
@@ -210,19 +210,19 @@ function selDown(x){const s=state;s.drag={x0:x,p0:s.pos,lx:x,lt:performance.now(
 function selMove(x){const s=state,d=s.drag;if(!d)return;const now=performance.now(),dt=Math.max(1,now-d.lt);d.v=d.v*.5+(-(x-d.lx)/SEL_SP)/dt*1000*.5;d.lx=x;d.lt=now;d.moved=Math.max(d.moved,Math.abs(x-d.x0));
  let p=d.p0-(x-d.x0)/SEL_SP;if(p<0)p*=.35;const PM=KIDS.length-1;if(p>PM)p=PM+(p-PM)*.35;s.pos=p}
 function selUp(x){const s=state,d=s.drag;if(!d)return;s.drag=null;
- if(d.moved<4){const tap=Math.round(s.pos+(x-160)/SEL_SP);s.target=Math.max(0,Math.min(KIDS.length-1,tap));return}
+ if(d.moved<4){const tap=Math.round(s.pos+(x-W/2)/SEL_SP);s.target=Math.max(0,Math.min(KIDS.length-1,tap));return}
  s.target=Math.max(0,Math.min(KIDS.length-1,Math.round(s.pos+d.v*.25)))}// flick: projects ~0.25 s of momentum, clamped (no looping)
 function updSelect(){const s=state;if(s.drag)return;const tg=s.target!=null?s.target:Math.max(0,Math.min(KIDS.length-1,Math.round(s.pos)));s.pos+=(tg-s.pos)*.18;if(Math.abs(tg-s.pos)<.002)s.pos=tg;kidIdx=Math.round(Math.max(0,Math.min(KIDS.length-1,s.pos)))}
 function drawSelect(){const s=state;{const g=X.createLinearGradient(0,0,0,H);g.addColorStop(0,'#2a1e3a');g.addColorStop(.6,'#6b3a3a');g.addColorStop(1,'#a8643a');X.fillStyle=g;X.fillRect(0,0,W,H);for(let j=0;j<24;j++)R((j*53)%W,(j*29)%(H*.45),1,1,'rgba(255,240,200,'+(.3+.3*Math.sin(t*2+j))+')');R(0,H*.66+2,W,H,'rgba(40,24,16,.55)')}
- txt(T("Who's coming with Jonah today?",'¿Quién va con Jonás hoy?'),160,26,17,'#f2c14e','center',240);
+ txt(T("Who's coming with Jonah today?",'¿Quién va con Jonás hoy?'),W/2,26,17,'#f2c14e','center',240);
  const base=H*.66,order=KIDS.map((k,i)=>i).sort((a,b)=>Math.abs(b-s.pos)-Math.abs(a-s.pos));
- for(const i of order){const d=i-s.pos,ad=Math.abs(d),x=160+d*SEL_SP;if(x<-40||x>W+40)continue;const sc=1+.2*Math.max(0,1-ad),hh=58*sc*(ad<1?1:.85);
+ for(const i of order){const d=i-s.pos,ad=Math.abs(d),x=W/2+d*SEL_SP;if(x<-40||x>W+40)continue;const sc=1+.2*Math.max(0,1-ad),hh=58*sc*(ad<1?1:.85);
   X.save();X.globalAlpha=Math.max(.35,1-ad*.35);
   if(ad<.5){const g=X.createRadialGradient(x,base-hh*.5,4,x,base-hh*.5,hh*.75);g.addColorStop(0,'rgba(255,225,140,.55)');g.addColorStop(1,'rgba(255,225,140,0)');X.fillStyle=g;X.fillRect(x-hh,base-hh*1.3,hh*2,hh*1.5);
    X.fillStyle='rgba(0,0,0,.25)';X.beginPath();X.ellipse(x,base+1,hh*.32,3,0,0,7);X.fill()}
   drawKid(ad<.5?'preach':'listen',x,base+(ad<.5?-Math.abs(Math.sin(t*4))*2:0),hh,1,ad<.5?'cheer':'listen',i,0,hh*1.15/.9);
   txt(KIDS[i].name,x,base+14,ad<.5?13:9,ad<.5?'#f2c14e':'#fff');X.restore()}
- for(let i=0;i<KIDS.length;i++){X.fillStyle=i===Math.round(s.pos)?'#f2c14e':'rgba(255,255,255,.45)';X.beginPath();X.arc(160+(i-(KIDS.length-1)/2)*9,base+24,2.2,0,7);X.fill()}}
+ for(let i=0;i<KIDS.length;i++){X.fillStyle=i===Math.round(s.pos)?'#f2c14e':'rgba(255,255,255,.45)';X.beginPath();X.arc(W/2+(i-(KIDS.length-1)/2)*9,base+24,2.2,0,7);X.fill()}}
 // ---- LEVEL 1: run to Joppa ----
 // ---- OPENING: God calls Jonah (Jonah 1:1-2). God is shown only as light from the sky. ----
 function startOpen(){clearUI();level='open';const st=state={t0:t};say('');
@@ -230,7 +230,7 @@ function startOpen(){clearUI();level='open';const st=state={t0:t};say('');
   bubble(T('God said to Jonah:','Dios le dijo a Jonás:'),T('"Get up and go to the big city of Nineveh. Tell the people to stop doing wrong things."','"Levántate y ve a la gran ciudad de Nínive. Diles a las personas que dejen de hacer cosas malas."'),T('Jonah 1:1-2','Jonás 1:1-2'),null,0,'tr');
   Snd.voice(9,T('Get up and go to the big city of Nineveh. Tell the people to stop doing wrong things.','Levántate y ve a la gran ciudad de Nínive. Diles a las personas que dejen de hacer cosas malas.'));
   setTimeout(()=>{if(level!=='open'||state!==st)return;st.ready=1;btn(T('Next ▶','Siguiente ▶'),'green',{right:'4%',bottom:'6%',fontSize:'30px'},()=>fadeTo(startRun))},(vd+.5)*1000)},900)}
-function drawOpen(){full('open_bg');const i=IMG.open_bg,fs=Math.min(W/i.width,H/i.height),iw=i.width*fs,ih=i.height*fs,fx=(W-iw)/2,fy=(H-ih)/2,P=(a,b)=>[fx+a*iw,fy+b*ih];
+function drawOpen(){full('open_bg');const i=IMG.open_bg,fs=FS(i),iw=i.width*fs,ih=i.height*fs,fx=(W-iw)/2,fy=(H-ih)/2,P=(a,b)=>[fx+a*iw,fy+b*ih];
  const el=t-state.t0,a=Math.min(1,el/1.5),[jx,jy]=P(.47,.87),[kx,ky]=P(.38,.83),[sx,sy]=P(.42,-.05),jh=ih*.3;
  X.save();X.globalCompositeOperation='lighter';
  for(let r=0;r<5;r++){const w=(.03+r*.018)*iw,p=.5+.5*Math.sin(t*1.2+r*1.7),g=X.createLinearGradient(sx,sy,jx,jy-jh*.5);g.addColorStop(0,'rgba(255,240,180,0)');g.addColorStop(.35,'rgba(255,236,170,'+(.07+.05*p)*a+')');g.addColorStop(1,'rgba(255,246,210,'+(.14+.08*p)*a+')');
@@ -259,7 +259,7 @@ function drawRun(){const s=state,G=H-30;R(0,0,W,H,'#f4a06a');tileX('joppa_sky',0
  if(!(s.inv&4)){let sx=1,sy=1,rot=0;if(s.pre){sx=1.18;sy=.8}else if(s.y<0){if(s.vy<-1.5){sx=.88;sy=1.14;rot=-.12}else{sx=1;sy=.95;rot=.18}}else if(s.land){const k=s.land/8;sx=1+.2*k;sy=1-.22*k}
   const by=G+2+s.y+(s.y||s.pre||s.land?0:Math.abs(Math.sin(t*14))*-2);X.save();X.translate(52,by);X.rotate(rot);X.scale(sx,sy);sp('jonah_run',0,0,50);X.restore()}
  if(level==='runwin'){const a=Math.min(1,(t-s.end)*1.5);X.globalAlpha=a;full('joppa_full');X.globalAlpha=1}
- else{R(8,8,66,10,'#2b1a10');R(9,9,64*Math.min(1,s.dist/s.goal),8,'#8fd18b');txt(T('to Joppa','a Jope'),8,30,9,'#fff','left')}}
+ else{R(SL+8,8,66,10,'#2b1a10');R(SL+9,9,64*Math.min(1,s.dist/s.goal),8,'#8fd18b');txt(T('to Joppa','a Jope'),SL+8,30,9,'#fff','left')}}
 
 // ---- Boarding cutscene (Jonah 1:3) ----
 function startBoard(){clearUI();level='board';state={t0:t,dist:state.dist||0,paid:0,btn:0,ce:Math.max(8.7,2.6+VDUR[3]+1.2)};say(T('Jonah finds a ship going to Tarshish.','Jonás encuentra un barco que va a Tarsis.'));}
@@ -268,7 +268,7 @@ function drawBoard(){const s=state,G=H-30,k=t-s.t0,E=x=>x<0?0:x>1?1:x*x*(3-2*x);
  R(0,G+4,W,H-G,'#2f78a8');X.fillStyle='#5aa6d0';for(let x=0;x<W;x+=16){X.beginPath();X.ellipse(x+((t*12)%16),G+8+Math.sin(t*3+x)*1.2,7,1.6,0,0,7);X.fill()}
  X.save();X.beginPath();X.rect(0,0,150,H);X.clip();tileX('dock_tile',G-2,H-G+2,s.dist,true);X.restore();R(146,G-2,5,H-G+2,'#5a3a1e');
  // timeline (s): dock walk 0-2.5 | pay 2.5-5.0 (coin 2.8-3.9) | verse voice 2.6-8.4 | plank 5.0-7.5 | caption 2.5-8.7 | sail 8.7-11.2 | Next 11.2
- const sail=E((k-s.ce)/2.5),sh=IMG.storm_ship,h=92,w=sh.width*h/sh.height,cx=228+sail*150,bob=Math.sin(t*2)*1.5,bot=H+4+bob,deck=bot-h*.24,left=cx-w/2+22,onb=bot-h*.22;
+ const sail=E((k-s.ce)/2.5),sh=IMG.storm_ship,h=92,w=sh.width*h/sh.height,cx=228+sail*(W-170),bob=Math.sin(t*2)*1.5,bot=H+4+bob,deck=bot-h*.24,left=cx-w/2+22,onb=bot-h*.22;
  if(sail<.05){X.strokeStyle='#7a4f2a';X.lineWidth=4;X.beginPath();X.moveTo(140,G+1);X.lineTo(left,deck+2);X.stroke();X.strokeStyle='#b88550';X.lineWidth=1;X.stroke()}
  const plankY=x=>G+1+(deck+2-G-1)*Math.max(0,Math.min(1,(x-140)/(left-140)));
  const jp=k=>{let jx,jy,pose='jonah_run',walk=true;
@@ -287,7 +287,7 @@ function drawBoard(){const s=state,G=H-30,k=t-s.t0,E=x=>x<0?0:x>1?1:x*x*(3-2*x);
   if(s.paid){const g=(k-s.pt)*5,al=Math.max(0,1-(k-s.pt)/1.1);X.strokeStyle='rgba(255,255,220,'+al+')';X.lineWidth=1;X.beginPath();X.moveTo(x-5-g,y);X.lineTo(x+5+g,y);X.moveTo(x,y-5-g);X.lineTo(x,y+5+g);X.stroke()}}
  if(k>2.6&&!s.vo){s.vo=1;say('');bubble('',T('Jonah paid for a ticket and got on the ship.','Jonás pagó su boleto y se subió al barco.'),T('Jonah 1:3','Jonás 1:3'));Snd.voice(3,T('Jonah paid for a ticket and got on the ship.','Jonás pagó su boleto y se subió al barco.'))}
  if(k>s.ce&&s.vo===1){s.vo=2;bubble()}
- if(k>s.ce){X.globalAlpha=Math.min(1,(k-s.ce)*1.5);txt(T('Off to Tarshish!','¡Rumbo a Tarsis!'),160,58,14,'#fff');X.globalAlpha=1}
+ if(k>s.ce){X.globalAlpha=Math.min(1,(k-s.ce)*1.5);txt(T('Off to Tarshish!','¡Rumbo a Tarsis!'),W/2,58,14,'#fff');X.globalAlpha=1}
  if(k>s.ce+2.5&&!s.btn){s.btn=1;btn(T('Next ▶','Siguiente ▶'),'green',{right:'4%',bottom:'6%'},()=>fadeTo(startStorm))}}
 // ---- LEVEL 2: storm ----
 let tiltOn=false,gamma=0;
@@ -317,7 +317,7 @@ s.tossed.forEach(o=>{o.x+=o.vx;o.y+=o.vy;o.vy+=.2;o.r+=.2});
  s.ang+=s.push*.15+ctl*.6;s.ang*=.94;s.ang=Math.max(-35,Math.min(35,s.ang))}
 // Jonah asks first (bubble + voice, no button). Only after he finishes does the toss button appear.
 function askJonah(){const st=state;if(st.asking||st.toss||st.calm)return;st.asking=1;clearUI();say(T('Jonah knows the storm came because he ran from God.','Jonás sabe que la tormenta llegó porque él huyó de Dios.'));
- bubble(T('Jonah said:','Jonás dijo:'),T('"Pick me up and throw me into the sea. Then the sea will be calm."','"Levántenme y tírenme al mar. Así el mar se calmará."'),T('Jonah 1:12','Jonás 1:12'),()=>[150,H-80]);Snd.voice(4,T('Pick me up and throw me into the sea. Then the sea will be calm.','Levántenme y tírenme al mar. Así el mar se calmará.'));
+ bubble(T('Jonah said:','Jonás dijo:'),T('"Pick me up and throw me into the sea. Then the sea will be calm."','"Levántenme y tírenme al mar. Así el mar se calmará."'),T('Jonah 1:12','Jonás 1:12'),()=>[150+OX,H-80]);Snd.voice(4,T('Pick me up and throw me into the sea. Then the sea will be calm.','Levántenme y tírenme al mar. Así el mar se calmará.'));
  setTimeout(()=>{if(level!=='storm'||state!==st||st.toss)return;bubble();st.canToss=1;btn(T('🌊 Throw Jonah in','🌊 Tirar a Jonás'),'green',{right:'3%',top:'24%'},calmStorm)},(VDUR[4]+.8+(fading?FD/1000:0))*1000)}
 function calmStorm(){const st=state;if(!st.canToss||st.toss||st.calm)return;clearUI();st.toss=1;say(T('The sailors throw Jonah into the sea...','Los marineros tiran a Jonás al mar...'))}
 // Jonah's toss path (world coords): lift on deck, arc off the right side, splash, sink
@@ -332,27 +332,27 @@ function drawStorm(){const s=state,c=s.calm?Math.min(1,s.calm/100):0,rough=1-c;
  tileX('storm_sky',0,H-20,t*4,true);if(c){X.globalAlpha=c;const sk=X.createLinearGradient(0,0,0,H);sk.addColorStop(0,'#6fc3f2');sk.addColorStop(.7,'#bfe7fb');sk.addColorStop(1,'#e8f7ff');X.fillStyle=sk;X.fillRect(0,0,W,H);X.globalAlpha=1;drawSun(c)}
  if(!c&&!s.toss&&(t*60|0)%97<5)shade(.35,'#fff7c0');
  const sh=IMG.storm_ship,h=110,w=sh.width*h/sh.height,seaTop=H-34,bob=Math.sin(t*2.2)*3*rough,ar=s.ang*Math.PI/180;
- const lift=Math.abs(Math.sin(ar))*w*.42;X.save();X.translate(160,seaTop+6+bob-lift);X.rotate(ar);X.drawImage(sh,-w/2,-h,w,h);drawKid(s.toss?'pray':'listen',-34,-24,26,1,null,null,1.2,30);if(!s.toss)sp('jonah_listen',-12,-24,30);X.restore();
- if(s.toss){const[jx,jy,jr,ja]=tossPos(s.toss);X.save();X.globalAlpha=ja;X.translate(jx,jy);X.rotate(jr);sp('jonah_listen',0,15,30);X.restore()}
- s.tossed.forEach(o=>{X.save();X.translate(o.x,o.y);X.rotate(o.r);X.drawImage(IMG.cargo_jar,-7,-7,14,14);X.restore()});
+ const lift=Math.abs(Math.sin(ar))*w*.42;X.save();X.translate(160+OX,seaTop+6+bob-lift);X.rotate(ar);X.drawImage(sh,-w/2,-h,w,h);drawKid(s.toss?'pray':'listen',-34,-24,26,1,null,null,1.2,30);if(!s.toss)sp('jonah_listen',-12,-24,30);X.restore();
+ if(s.toss){const[jx,jy,jr,ja]=tossPos(s.toss);X.save();X.globalAlpha=ja;X.translate(jx+OX,jy);X.rotate(jr);sp('jonah_listen',0,15,30);X.restore()}
+ s.tossed.forEach(o=>{X.save();X.translate(o.x+OX,o.y);X.rotate(o.r);X.drawImage(IMG.cargo_jar,-7,-7,14,14);X.restore()});
  const sea=IMG.storm_sea,sw=W,shh=sea.height*W/sea.width;X.drawImage(sea,Math.sin(t*1.5)*6*rough-6,seaTop+Math.sin(t*2)*2*rough,sw+12,shh);if(c){X.globalAlpha=c*.4;R(0,seaTop,W,H-seaTop,'#7fc4ea');X.globalAlpha=1}
- if(s.toss>=112&&s.toss<200){const k=(s.toss-112)/88;X.save();X.globalAlpha=1-k;X.strokeStyle='#e8f6ff';X.lineWidth=2.5;for(const rr of[1,.6,.3]){X.beginPath();X.ellipse(262,H-30,6+k*30*rr,2+k*7*rr,0,0,7);X.stroke()}X.restore();
+ if(s.toss>=112&&s.toss<200){const k=(s.toss-112)/88;X.save();X.translate(OX,0);X.globalAlpha=1-k;X.strokeStyle='#e8f6ff';X.lineWidth=2.5;for(const rr of[1,.6,.3]){X.beginPath();X.ellipse(262,H-30,6+k*30*rr,2+k*7*rr,0,0,7);X.stroke()}X.restore();
   if(k<.3){const g=1-k/.3;X.fillStyle='rgba(235,248,255,'+g+')';for(let i=-3;i<=3;i++){X.beginPath();X.moveTo(262+i*5-3,H-30);X.lineTo(262+i*5,H-30-(16-Math.abs(i)*3)*Math.sin(Math.min(1,k*8)*Math.PI/2));X.lineTo(262+i*5+3,H-30);X.fill()}}
-  s.drops.forEach(d=>{if(d.y<H-26){X.fillStyle='#2b4f7a';X.beginPath();X.arc(d.x,d.y,d.r/2+.6,0,7);X.fill();X.fillStyle='#e6f6ff';X.beginPath();X.arc(d.x,d.y,d.r/2,0,7);X.fill()}})}
+  s.drops.forEach(d=>{if(d.y<H-26){X.fillStyle='#2b4f7a';X.beginPath();X.arc(d.x+OX,d.y,d.r/2+.6,0,7);X.fill();X.fillStyle='#e6f6ff';X.beginPath();X.arc(d.x+OX,d.y,d.r/2,0,7);X.fill()}})}
 
  if(rough>.05)for(let i=0;i<50*rough;i++)R((i*37+t*160)%W,(i*53+t*380)%H,.7,5,'rgba(200,215,240,.7)');
- for(let i=0;i<s.cargo;i++)X.drawImage(IMG.cargo_jar,8+i*13,8,12,12);
+ for(let i=0;i<s.cargo;i++)X.drawImage(IMG.cargo_jar,SL+8+i*13,8,12,12);
  // balance bar: bottom centre, clear of the message box and buttons
- const a=Math.abs(s.ang)/35;R(110,H-20,100,10,'#2b1a10');R(111,H-19,98*(1-a),8,a>.6?'#f28b6b':'#8fd18b');txt(T('Balance','Equilibrio'),160,H-24,9);
- if(level==='stormwin'){X.globalAlpha=Math.min(1,(t-s.end)*1.5);full('fish_full');{const fi=IMG.fish_full,fs=Math.min(W/fi.width,H/fi.height),fx=(W-fi.width*fs)/2,fy=(H-fi.height*fs)/2;sp('jonah_pray',fx+fi.width*fs*.56,fy+fi.height*fs*.72,fi.height*fs*.2);drawKid('pray',fx+fi.width*fs*.45,fy+fi.height*fs*.72,fi.height*fs*.15,1,'pray',null,1)}X.globalAlpha=1}}
+ const a=Math.abs(s.ang)/35;R(110+OX,H-20,100,10,'#2b1a10');R(111+OX,H-19,98*(1-a),8,a>.6?'#f28b6b':'#8fd18b');txt(T('Balance','Equilibrio'),W/2,H-24,9);
+ if(level==='stormwin'){X.globalAlpha=Math.min(1,(t-s.end)*1.5);full('fish_full');{const fi=IMG.fish_full,fs=FS(fi),fx=(W-fi.width*fs)/2,fy=(H-fi.height*fs)/2;sp('jonah_pray',fx+fi.width*fs*.56,fy+fi.height*fs*.72,fi.height*fs*.2);drawKid('pray',fx+fi.width*fs*.45,fy+fi.height*fs*.72,fi.height*fs*.15,1,'pray',null,1)}X.globalAlpha=1}}
 // ---- LEVEL 3: inside the fish (KJV, Jonah 2) ----
 const LINES_ES=[['Estaba en problemas y llamé al Señor. ¡Y él me respondió!','Jonás 2:2','dos, versículo dos'],['Cuando me sentí débil, me acordé del Señor.','Jonás 2:7','dos, versículo siete'],['¡El Señor es el que salva!','Jonás 2:9','dos, versículo nueve']];const LN=()=>LANG==='es'?LINES_ES:LINES;
 const LINES=[['I was in trouble, so I called to the Lord. And he answered me!','Jonah 2:2','two, verse two'],['When I felt weak, I remembered the Lord.','Jonah 2:7','two, verse seven'],['The Lord is the one who saves!','Jonah 2:9','two, verse nine']];
-function startFish(){clearUI();level='fish';Snd.music('fish');state={x:72,kx:50,kface:1,dir:0,face:1,got:[false,false,false],sx:[110,190,280],done:0};
+function startFish(){clearUI();level='fish';Snd.music('fish');state={x:72,kx:50,kface:1,dir:0,face:1,got:[false,false,false],sx:[110,190,280].map(x=>Math.round(x*W/320)),done:0};
  say(T('Level 3: Inside the fish, Jonah prays. Walk and find 3 prayer scrolls!','Nivel 3: Dentro del pez, Jonás ora. ¡Camina y encuentra 3 rollos de oración!'));
  holdBtn('◀',{bottom:'6%',left:'3%',fontSize:'44px'},'l');holdBtn('▶',{bottom:'6%',right:'3%',fontSize:'44px'},'r');
 }
-function updFish(){const s=state;s.dir=(s.r||0)-(s.l||0);if(s.dir)s.face=s.dir;if(s.done||t<(s.hold||0))return;s.x=Math.max(14,Math.min(300,s.x+s.dir*1.6));
+function updFish(){const s=state;s.dir=(s.r||0)-(s.l||0);if(s.dir)s.face=s.dir;if(s.done||t<(s.hold||0))return;s.x=Math.max(SL+14,Math.min(W-SR-20,s.x+s.dir*1.6));
  s.sx.forEach((x,i)=>{if(!s.got[i]&&Math.abs(s.x-x)<12){s.got[i]=true;Snd.chime();s.hold=t+.45+VDUR[i]+.4;say(T('📜 Prayer ','📜 Oración ')+s.got.filter(Boolean).length+T(' of 3',' de 3'));bubble(T('Jonah prayed:','Jonás oró:'),'"'+LN()[i][0]+'"',LN()[i][1],()=>[state.x,H-80]);setTimeout(()=>Snd.voice(i,LN()[i][0]),450);
   if(s.got.every(Boolean)){s.done=1;setTimeout(()=>{level='fishwin';state.end=t;clearUI();say(T('WHOOSH! The fish spit Jonah onto dry land. God gave him a second chance!','¡FUUUSH! El pez escupió a Jonás en tierra firme. ¡Dios le dio otra oportunidad!'));btn(T('Next ▶','Siguiente ▶'),'green',{right:'4%',bottom:'6%'},()=>fadeTo(startPreach))},Math.max(2600,(.45+VDUR[i]+1.2)*1000))}}})}
 function scroll(x,y){X.fillStyle='rgba(255,220,130,.35)';X.beginPath();X.arc(x,y,13+Math.sin(t*4)*1.5,0,7);X.fill();
@@ -366,8 +366,8 @@ function drawFish(){const s=state;const bt=IMG.belly_top,th=bt.height*W/bt.width
  {const tg=s.x-20*s.face,dx=tg-s.kx;s.kx+=Math.max(-1.7,Math.min(1.7,dx*.12));const mv=Math.abs(dx)>2;if(mv)s.kface=dx>0?1:-1;else s.kface=s.face;
   if(mv)drawKid('run',s.kx,H-18+Math.abs(Math.sin(t*12+1))*-1.5,40,s.kface,'run');else drawKid('pray',s.kx,H-18,40,s.kface,'pray')}
  if(s.dir)sp('jonah_run',s.x,H-18+Math.abs(Math.sin(t*12))*-2,58,s.face<0);else sp('jonah_pray',s.x,H-18,58);
- for(let i=0;i<3;i++){if(s.got[i])scroll(140+i*20,H-10);else{X.globalAlpha=.35;scroll(140+i*20,H-10);X.globalAlpha=1}}
- if(level==='fishwin'){X.globalAlpha=Math.min(1,(t-s.end)*1.5);full('beach_full');{const bi=IMG.beach_full,bs=Math.min(W/bi.width,H/bi.height),ox=(W-bi.width*bs)/2,oy2=(H-bi.height*bs)/2;
+ for(let i=0;i<3;i++){if(s.got[i])scroll(W/2-20+i*20,H-10);else{X.globalAlpha=.35;scroll(W/2-20+i*20,H-10);X.globalAlpha=1}}
+ if(level==='fishwin'){X.globalAlpha=Math.min(1,(t-s.end)*1.5);full('beach_full');{const bi=IMG.beach_full,bs=FS(bi),ox=(W-bi.width*bs)/2,oy2=(H-bi.height*bs)/2;
   X.fillStyle='rgba(60,40,10,.25)';X.beginPath();X.ellipse(ox+600*bs,oy2+652*bs,60*bs,10*bs,0,0,7);X.ellipse(ox+790*bs,oy2+662*bs,50*bs,9*bs,0,0,7);X.fill();sp('jonah_preach',ox+600*bs,oy2+650*bs,300*bs,false);drawKid('preach',ox+790*bs,oy2+(660-Math.abs(Math.sin(t*4))*8)*bs,210*bs,-1,'cheer')}X.globalAlpha=1}}
 // ---- LEVEL 4: Nineveh (gray ↔ bright, regions of the sample art) ----
 const CITY=[['b',3,22,38,24],['b',41,22,65,22],['b',106,22,38,30],['b',144,22,20,30],['b',227,22,38,30],['b',265,22,55,24],['k',170,30,46,58],['p',3,43,44,131],['p',45,54,39,111],['p',83,54,36,111],['p',112,45,36,115],['p',147,65,34,102],['p',202,54,34,106],['p',233,45,45,122],['p',273,65,36,110]];
@@ -378,7 +378,7 @@ function startPreach(){clearUI();level='preach';const st=state={t0:t};say('');
   bubble('',T('Jonah went to the big city of Nineveh. He told the people: "In 40 days, Nineveh will be knocked down!"','Jonás fue a la gran ciudad de Nínive. Les dijo a las personas: "¡En 40 días, Nínive será derribada!"'),T('Jonah 3:3-4','Jonás 3:3-4'),null,0,'tr');
   Snd.voice(10,T(PV_EN,PV_ES));
   setTimeout(()=>{if(level!=='preach'||state!==st)return;st.ready=1;btn(T('Next ▶','Siguiente ▶'),'green',{right:'4%',bottom:'6%',fontSize:'30px'},()=>fadeTo(startCity))},(vd+.5)*1000)},900)}
-function drawPreach(){const el=t-state.t0,oy=H-180;cityImg('nineveh_gray');
+function drawPreach(){const el=t-state.t0,oy=H-180;X.save();X.translate(OX,0);cityImg('nineveh_gray');X.restore();
  const wk=Math.min(1,el/2.6),walking=wk<1,jx=-20+wk*(W*.5+10),gy=H-8,jh=84,step=walking?Math.abs(Math.sin(el*9))*1.5:0;
  {const g=X.createRadialGradient(jx-20,gy-jh*.5,4,jx-20,gy-jh*.5,jh*.9);g.addColorStop(0,'rgba(255,225,150,.45)');g.addColorStop(1,'rgba(255,225,150,0)');X.fillStyle=g;X.fillRect(jx-20-jh,gy-jh*1.4,jh*2,jh*1.5)}
  X.fillStyle='rgba(0,0,0,.3)';X.beginPath();X.ellipse(jx-44,gy+1,12,3,0,0,7);X.ellipse(jx,gy+1,15,3.5,0,0,7);X.fill();
@@ -386,7 +386,7 @@ function drawPreach(){const el=t-state.t0,oy=H-180;cityImg('nineveh_gray');
  if(walking)sp('jonah_run',jx,gy-step,jh);else{X.save();X.translate(jx,gy);X.scale(1,1+Math.sin(t*2)*.01);sp('jonah_preach',0,0,jh);X.restore()}}
 function startCity(){clearUI();level='city';Snd.music('run');state={it:CITY.map(([k,x,y,w,h])=>({k,x,y,w,h,lit:0})),done:0};
  say(T('Level 4: Jonah tells Nineveh about God. Tap the people and buildings to fill the city with color!','Nivel 4: Jonás le habla de Dios a Nínive. ¡Toca a las personas y los edificios para llenar la ciudad de color!'))}
-function tapCity(px,py){const s=state;py-=H-180;let best=null;for(const o of s.it){if(!o.lit&&px>=o.x&&px<=o.x+o.w&&py>=o.y&&py<=o.y+o.h){if(!best||o.w*o.h<best.w*best.h)best=o}}
+function tapCity(px,py){const s=state;px-=OX;py-=H-180;let best=null;for(const o of s.it){if(!o.lit&&px>=o.x&&px<=o.x+o.w&&py>=o.y&&py<=o.y+o.h){if(!best||o.w*o.h<best.w*best.h)best=o}}
  if(best){best.lit=t;say('')}
  if(!s.done&&s.it.every(o=>o.lit)){s.done=1;setTimeout(()=>{level='end';state.endT=t;say('');setTimeout(()=>{if(level!=='end')return;bubble(T('God said:','Dios dijo:'),T('"I care about the big city of Nineveh, and all the people in it."','"Me importa mucho la gran ciudad de Nínive y toda la gente que vive en ella."'),T('Jonah 4:11','Jonás 4:11'));Snd.voice(5,T("God said: I care about the big city of Nineveh, and all the people in it. God's mercy is for everyone!",'Dios dijo: Me importa mucho la gran ciudad de Nínive y toda la gente que vive en ella. ¡La misericordia de Dios es para todos!'))},500);setTimeout(()=>{if(level!=='end')return;btn(T('Next ▶','Siguiente ▶'),'green',{left:'50%',bottom:'8%',transform:'translateX(-50%)',fontSize:'34px'},()=>fadeTo(startHill))},(VDUR[5]+.5+.8)*1000)},600)}}
 // ---- Closing screen: Jonah on the hillside outside Nineveh (Jonah 4), the kid peeking over his shoulder ----
@@ -395,7 +395,7 @@ function startHill(){clearUI();level='hill';const st=state={t0:t};say('');
   bubble(T('Jonah said:','Jonás dijo:'),T('"I know that you are kind and loving. You are slow to get angry, and full of love."','"Yo sé que tú eres bueno y amoroso. Tardas en enojarte y estás lleno de amor."'),T('Jonah 4:2','Jonás 4:2'),null,0,'tr');
   Snd.voice(8,T('Jonah said to God: I know that you are kind and loving. You are slow to get angry, and full of love.','Jonás le dijo a Dios: Yo sé que tú eres bueno y amoroso. Tardas en enojarte y estás lleno de amor.'));
   setTimeout(()=>{if(level!=='hill'||state!==st)return;st.ready=1;btn(T('🔁 Play Again','🔁 Jugar otra vez'),'green',{right:'4%',bottom:'6%',fontSize:'30px'},()=>fadeTo(title))},(vd+.5)*1000)},900)}
-function drawHill(){full('hill_full');const i=IMG.hill_full,fs=Math.min(W/i.width,H/i.height),iw=i.width*fs,ih=i.height*fs,fx=(W-iw)/2,fy=(H-ih)/2,P=(a,b)=>[fx+a*iw,fy+b*ih];
+function drawHill(){full('hill_full');const i=IMG.hill_full,fs=FS(i),iw=i.width*fs,ih=i.height*fs,fx=(W-iw)/2,fy=(H-ih)/2,P=(a,b)=>[fx+a*iw,fy+b*ih];
  const br=1+Math.sin(t*1.8)*.006,[kx,ky]=P(.272,.815),[jx,jy]=P(.335,.845);
  drawKid('listen',kx,ky+Math.sin(t*1.3)*.4,ih*.19,1,'listen');
  X.save();X.translate(jx,jy);X.scale(1,br);sp('jonah_pray',0,0,ih*.27);X.restore();
@@ -403,10 +403,11 @@ function drawHill(){full('hill_full');const i=IMG.hill_full,fs=Math.min(W/i.widt
  const [ax,ay]=P(.17,.735),[bx,by]=P(.44,.80);X.save();X.beginPath();X.moveTo(ax,by);X.bezierCurveTo(ax,ay-ih*.01,ax+(bx-ax)*.35,ay-ih*.02,ax+(bx-ax)*.55,ay+ih*.005);X.bezierCurveTo(ax+(bx-ax)*.8,ay+ih*.012,bx,ay+ih*.02,bx,by);X.quadraticCurveTo(bx,fy+ih*.86,(ax+bx)/2,fy+ih*.87);X.quadraticCurveTo(ax,fy+ih*.86,ax,by);X.closePath();
  X.save();X.clip();X.drawImage(i,i.width*.0,i.height*.80,i.width*.3,i.height*.17,ax,ay-ih*.02,bx-ax,fy+ih*.88-ay);X.fillStyle='rgba(40,30,10,.18)';X.fillRect(ax,ay-ih*.03,bx-ax,ih*.2);X.restore();
  X.beginPath();X.moveTo(ax,by);X.bezierCurveTo(ax,ay-ih*.01,ax+(bx-ax)*.35,ay-ih*.02,ax+(bx-ax)*.55,ay+ih*.005);X.bezierCurveTo(ax+(bx-ax)*.8,ay+ih*.012,bx,ay+ih*.02,bx,by);X.strokeStyle='#3b2a12';X.lineWidth=Math.max(.6,ih*.004);X.stroke();X.restore()}
-function cityImg(n){const i=IMG[n],h=i.height*W/i.width;X.drawImage(i,0,H-h,W,h)}
-function drawCity(){const s=state,oy=H-180;cityImg('nineveh_gray');
+function cityImg(n,clip){const i=IMG[n],h=i.height*320/i.width;X.drawImage(i,0,H-h,320,h);if(!clip&&OX>0){X.save();X.scale(-1,1);X.drawImage(i,0,H-h,320,h);X.translate(-640,0);X.drawImage(i,0,H-h,320,h);X.restore()}}
+function drawCity(){X.save();X.translate(OX,0);try{drawCity0()}finally{X.restore()}}
+function drawCity0(){const s=state,oy=H-180;cityImg('nineveh_gray');
  s.it.forEach(o=>{if(!o.lit)return;const a=Math.min(1,(t-o.lit)*3);X.save();X.globalAlpha=a;X.beginPath();
-  if(o.k==='p'||o.k==='k')X.ellipse(o.x+o.w/2,o.y+oy+o.h/2,o.w/2+2,o.h/2+2,0,0,7);else X.rect(o.x,o.y+oy,o.w,o.h);X.clip();cityImg('nineveh_bright');X.restore()});
+  if(o.k==='p'||o.k==='k')X.ellipse(o.x+o.w/2,o.y+oy+o.h/2,o.w/2+2,o.h/2+2,0,0,7);else X.rect(o.x,o.y+oy,o.w,o.h);X.clip();cityImg('nineveh_bright',1);X.restore()});
  if(level==='city'){const ph=t%1,blink=ph<.55?Math.min(1,ph/.12):Math.max(0,1-(ph-.55)/.12);// ~1 Hz on/off blink with soft edges
   X.save();X.lineWidth=1.2;X.setLineDash([4,3]);X.lineDashOffset=-t*6;
   s.it.forEach(o=>{if(o.lit)return;X.beginPath();
@@ -415,13 +416,13 @@ function drawCity(){const s=state,oy=H-180;cityImg('nineveh_gray');
   X.restore()}
  if(level==='end'){const ea=Math.min(1,(t-(s.endT||0))/.6),et=t-(s.endT||0);X.save();X.globalAlpha=ea;cityImg('nineveh_bright');
   // rejoicing: each person/king is redrawn from the bright art, stretched up from the feet (hop/cheer) with a slight sway
-  const ci=IMG.nineveh_bright,ch=ci.height*W/ci.width,cy=H-ch;
+  const ci=IMG.nineveh_bright,ch=ci.height*320/ci.width,cy=H-ch;
   s.it.forEach((o,i)=>{if(o.k==='b')return;const king=o.k==='k',p=et*(king?2.2:4.2)+i*1.7,hop=Math.max(0,Math.sin(p)),ramp=Math.min(1,et/.8);
    const sy=1+(king?.025:.06)*hop*ramp,sx=1-(king?.008:.02)*hop*ramp,rot=Math.sin(p*.5+i)*(king?.012:.035)*ramp,fx=o.x+o.w/2,fy=o.y+oy+o.h;
-   X.save();X.translate(fx,fy);X.rotate(rot);X.scale(sx,sy);X.translate(-fx,-fy);X.beginPath();X.ellipse(o.x+o.w/2,o.y+oy+o.h/2,o.w/2+2,o.h/2+2,0,0,7);X.clip();X.drawImage(ci,0,cy,W,ch);X.restore()});
+   X.save();X.translate(fx,fy);X.rotate(rot);X.scale(sx,sy);X.translate(-fx,-fy);X.beginPath();X.ellipse(o.x+o.w/2,o.y+oy+o.h/2,o.w/2+2,o.h/2+2,0,0,7);X.clip();X.drawImage(ci,0,cy,320,ch);X.restore()});
   // birds flapping across the sky
-  for(let b=0;b<4;b++){const bx=((et*22+b*90)%(W+40))-20,by=14+b*5+Math.sin(et*2+b)*3,f=Math.sin(et*9+b*2)*3;X.strokeStyle='#2b1a10';X.lineWidth=1.3;X.beginPath();X.moveTo(bx-5,by-f);X.quadraticCurveTo(bx-2,by-1,bx,by+1);X.quadraticCurveTo(bx+2,by-1,bx+5,by-f);X.stroke()}
-  for(let i=0;i<40;i++)R((i*47+t*40)%W,(i*31+t*60)%H,3,3,['#f2c14e','#f28b6b','#7ec8e3','#8fd18b'][i%4]);
+  for(let b=0;b<4;b++){const bx=((et*22+b*90)%(W+40))-20-OX,by=14+b*5+Math.sin(et*2+b)*3,f=Math.sin(et*9+b*2)*3;X.strokeStyle='#2b1a10';X.lineWidth=1.3;X.beginPath();X.moveTo(bx-5,by-f);X.quadraticCurveTo(bx-2,by-1,bx,by+1);X.quadraticCurveTo(bx+2,by-1,bx+5,by-f);X.stroke()}
+  for(let i=0;i<40;i++)R((i*47+t*40)%W-OX,(i*31+t*60)%H,3,3,['#f2c14e','#f28b6b','#7ec8e3','#8fd18b'][i%4]);
   X.save();X.translate(160,24);X.rotate(Math.sin(et*1.6)*.015);X.translate(-160,-24-Math.sin(et*2.4)*1.2);R(20,24,280,40,'#2b1a10');R(23,27,274,34,'#fff6dc');txt(T("God's mercy is for everyone!",'¡La misericordia de Dios es para todos!'),160,51,17,'#f2c14e','center',264);X.restore();
   {const hp=Math.max(0,Math.sin(et*5)),land=Math.max(0,-Math.sin(et*5));X.save();X.translate(30,H-2-hp*6);X.scale(1+land*.05,1-land*.05);sp('jonah_preach',0,0,70);X.restore()}
   {const hp=Math.max(0,Math.sin(et*5+1.6)),land=Math.max(0,-Math.sin(et*5+1.6));X.save();X.translate(58,H-2-hp*5);X.scale(1+land*.05,1-land*.05);drawKid('preach',0,0,52,1,'cheer',null,1.3,70);X.restore()}X.restore()}
@@ -430,7 +431,7 @@ function drawCity(){const s=state,oy=H-180;cityImg('nineveh_gray');
 function toGame(e){const r=C.getBoundingClientRect(),p=e.touches?e.touches[0]:e;return[(p.clientX-r.left)/r.width*W,(p.clientY-r.top)/r.height*H]}
 C.addEventListener('touchstart',e=>{e.preventDefault();const[x,y]=toGame(e);if(level==='select')selDown(x);if(level==='run')jump();if(level==='city')tapCity(x,y)},{passive:false});
 C.addEventListener('touchmove',e=>{e.preventDefault();if(level==='select')selMove(toGame(e)[0])},{passive:false});
-C.addEventListener('touchend',e=>{if(level==='select'){const p=e.changedTouches&&e.changedTouches[0];selUp(p?(p.clientX-C.getBoundingClientRect().left)/C.getBoundingClientRect().width*W:160)}});
+C.addEventListener('touchend',e=>{if(level==='select'){const p=e.changedTouches&&e.changedTouches[0];selUp(p?(p.clientX-C.getBoundingClientRect().left)/C.getBoundingClientRect().width*W:W/2)}});
 addEventListener('mousemove',e=>{if(level==='select'&&state.drag)selMove(toGame(e)[0])});addEventListener('mouseup',e=>{if(level==='select'&&state.drag)selUp(toGame(e)[0])});
 ['pointerdown','touchstart','mousedown'].forEach(ev=>addEventListener(ev,()=>{if(level==='runwin'&&state.skip&&t-state.end>.4)state.skip()},{passive:true}));
 addEventListener('keydown',e=>{if(level==='select'){if(e.code==='ArrowLeft')selGo(-1);if(e.code==='ArrowRight')selGo(1)}});
@@ -443,8 +444,9 @@ let paused=false;const ROT=document.getElementById('rotate');
 function setPaused(p){if(p===paused)return;paused=p;ROT.classList.toggle('on',p);try{const a=Snd.ctx;if(a){p?a.suspend():a.resume()}}catch(e){}try{p?window.speechSynthesis&&speechSynthesis.pause():window.speechSynthesis&&speechSynthesis.resume()}catch(e){}}
 function fit(){const[vw,vh]=vp(),[it,ir,ib,il]=insets(),aw=Math.max(1,vw-il-ir),ah=Math.max(1,vh-it-ib);
  const portrait=vh>vw*1.05;setPaused(portrait);
- H=Math.round(Math.max(180,Math.min(240,W*ah/aw)));const _s0=Math.min(aw/W,ah/H);RS=Math.max(2,Math.min(4,_s0*Math.min(window.devicePixelRatio||1,2)));C.width=Math.round(W*RS);C.height=Math.round(H*RS);X.setTransform(RS,0,0,RS,0,0);X.imageSmoothingEnabled=true;X.imageSmoothingQuality='high';
- const s=Math.min(aw/W,ah/H),cw=W*s,ch=H*s,cl=il+(aw-cw)/2,ct=it+(ah-ch)/2;C.style.width=cw+'px';C.style.height=ch+'px';C.style.left=cl+'px';C.style.top=ct+'px';
+ H=Math.round(Math.max(180,Math.min(240,320*vh/vw)));W=Math.max(320,Math.min(440,Math.round(H*vw/vh)));OX=(W-320)/2;const _s0=Math.min(vw/W,vh/H);RS=Math.max(2,Math.min(4,_s0*Math.min(window.devicePixelRatio||1,2)));C.width=Math.round(W*RS);C.height=Math.round(H*RS);X.setTransform(RS,0,0,RS,0,0);X.imageSmoothingEnabled=true;X.imageSmoothingQuality='high';
+ const s=Math.min(vw/W,vh/H),cw0=W*s,ch0=H*s,cl0=(vw-cw0)/2,ct0=(vh-ch0)/2;C.style.width=(Math.abs(vw-cw0)<3?vw:cw0)+'px';C.style.height=(Math.abs(vh-ch0)<3?vh:ch0)+'px';C.style.left=(Math.abs(vw-cw0)<3?0:cl0)+'px';C.style.top=(Math.abs(vh-ch0)<3?0:ct0)+'px';SL=Math.max(0,il-cl0)/s;SR=Math.max(0,ir-cl0)/s;
+ const cl=Math.max(cl0,il),ct=Math.max(ct0,it),cw=Math.min(cl0+cw0,vw-ir)-cl,ch=Math.min(ct0+ch0,vh-ib)-ct;window.__safe={left:cl,top:ct,width:cw,height:ch,right:cl+cw,bottom:ct+ch};
  UIK=Math.max(.5,Math.min(1.25,Math.min(cw/1024,ch/700)));const st=document.documentElement.style;st.setProperty('--k',UIK.toFixed(3));
  st.setProperty('--cl',cl+'px');st.setProperty('--ct',ct+'px');st.setProperty('--cw',cw+'px');st.setProperty('--ch',ch+'px');try{placeBubble()}catch(e){}}
 let fitT=[];function refit(){fit();requestAnimationFrame(fit);fitT.forEach(clearTimeout);fitT=[120,350,700].map(d=>setTimeout(fit,d))}
@@ -502,4 +504,5 @@ const st0=step;step=function(){X.setTransform(RS,0,0,RS,0,0);X.clearRect(0,0,W,H
 })();
 window.__jonah.gH=()=>H;
 window.__jonah.gT=()=>t;
+window.__jonah.gOX=()=>OX;window.__jonah.gW=()=>W;
 </script></body></html>
