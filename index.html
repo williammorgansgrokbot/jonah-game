@@ -40,7 +40,8 @@ html,body{margin:0;height:100%;position:fixed;inset:0;overscroll-behavior:none;-
 #card .stars i.off{color:#cbbfa8;text-shadow:none}
 #card .v{font-family:Georgia,"Times New Roman",serif;font-style:italic;font-size:17px;line-height:1.35;margin:6px 0 2px;color:#2b1a10}
 #card .ref{font-weight:bold;color:#7a4a12;font-size:15px;margin-bottom:10px}
-#card .kjv{font-size:11px;color:#8a7a62;letter-spacing:1px}
+#card .ver{font-size:11px;color:#8a7a62;letter-spacing:1px}
+#card .credit{font-size:9px;line-height:1.25;color:#8a7a62;margin:8px auto 0;max-width:440px}
 #card .row{display:flex;gap:12px;justify-content:center}
 #card .btn{position:static}
 #fade{position:fixed;inset:0;background:#000;opacity:1;z-index:8;pointer-events:auto;transition:opacity .5s ease}
@@ -197,12 +198,15 @@ let fading=true;
 function fadeIn(){FADE.style.opacity='0';setTimeout(()=>{fading=false;FADE.style.pointerEvents='none'},500)}
 function go(S,arg){if(fading&&G.scene)return;fading=true;FADE.style.pointerEvents='auto';FADE.style.opacity='1';hideCard();
  setTimeout(()=>{try{clearUI();G.fx=[];G.keys={};G.ptr.down=false;G.scene=S(arg);G.scene.t=0;G.scene.init&&G.scene.init()}catch(e){window.__showErr&&__showErr(e.message);console.error(e)}fadeIn()},G.scene?500:50)}
-// level-complete card with KJV verse
+// level-complete card with NIrV verse
+const NIRV_NOTICE='Scripture quotations taken from The Holy Bible, New International Reader\'s Version®, NIrV® Copyright © 1995, 1996, 1998, 2014 by Biblica, Inc.® Used by permission. All rights reserved worldwide.';
 function stars(n){let s='';for(let i=0;i<3;i++)s+='<i class="'+(i<n?'':'off')+'" style="animation-delay:'+(.25+i*.18)+'s">★</i>';return s}
 function card(o){const inn=CARD.querySelector('.in');inn.innerHTML=(o.title?'<h2>'+o.title+'</h2>':'')+(o.stars!=null?'<div class="stars">'+stars(o.stars)+'</div>':'')+(o.sub?'<div style="font-weight:bold;font-size:14px;color:#5a4a3a">'+o.sub+'</div>':'')+
- '<div class="v">“'+o.verse+'”</div><div class="ref">'+o.ref+' <span class="kjv">KJV</span></div><div class="row"></div>';
+ '<div class="v">“'+o.verse+'”</div><div class="ref">'+o.ref+' <span class="ver">(NIrV)</span></div><div class="row"></div>'+(o.credit?'<div class="credit">'+o.credit+'</div>':'');
  const row=inn.querySelector('.row');(o.btns||[]).forEach((b,i)=>{const e=btn(b.label,b.cls||'green',{},()=>{if(fading)return;b.fn()});row.appendChild(e)});
- cap('');CARD.classList.add('on');G.paused=true;Snd.play(o.sfx||'win');if(G.auto&&o.btns&&o.btns.length){const b=o.btns[o.btns.length-1];setTimeout(()=>{if(CARD.classList.contains('on'))b.fn()},1500)}}
+ cap('');CARD.classList.add('on');fitCard(inn);G.paused=true;Snd.play(o.sfx||'win');if(G.auto&&o.btns&&o.btns.length){const b=o.btns[o.btns.length-1];setTimeout(()=>{if(CARD.classList.contains('on'))b.fn()},1500)}}
+function fitCard(inn){const v=inn.querySelector('.v');if(!v)return;let f=parseFloat(getComputedStyle(v).fontSize);v.style.fontSize='';f=parseFloat(getComputedStyle(v).fontSize);while(inn.scrollHeight>inn.clientHeight+1&&f>10.5){f-=.5;v.style.fontSize=f+'px';v.style.lineHeight='1.28'}}
+addEventListener('resize',()=>{if(CARD.classList.contains('on'))fitCard(CARD.querySelector('.in'))});
 function hideCard(){CARD.classList.remove('on');G.paused=false}
 function levelDone(i,starsN,dl){const L=LEVELS[i];const best=+(store.get(GAME_ID+'S'+i)||0);if(starsN>best)store.set(GAME_ID+'S'+i,starsN);
  const un=+(store.get(GAME_ID+'Unl')||0);if(i+1>un)store.set(GAME_ID+'Unl',i+1);
@@ -376,7 +380,7 @@ function GourdScene(){const S={name:'finale',g:0,taps:0,N:6,
  upd(){hud('Shade for Jonah','Grow '+this.taps+' / '+this.N)},
  tap(x,y){if(this.done)return;this.taps++;Snd.play('good');const [gx,gy]=this.gpos();burst(gx,gy-this.g*40,10);this.upd();cap('');
   if(this.taps>=this.N){this.done=1;fullBurst();cap('God cares for Jonah, and for all the people of Nineveh! 💛');
-   setTimeout(()=>card({title:'God loves everyone! 🐋',sub:'You finished Jonah’s Journey!',verse:'And should not I spare Nineveh, that great city, wherein are more than sixscore thousand persons that cannot discern between their right hand and their left hand; and also much cattle?',ref:'Jonah 4:11',btns:[{label:'🏠 Home',cls:'cream',fn:()=>go(TitleScene)},{label:'↻ Play Again',cls:'green',fn:()=>go(LEVELS[0].intro)}],sfx:'fanfare'}),2600)}},
+   setTimeout(()=>card({title:'God loves everyone! 🐋',sub:'You finished Jonah’s Journey!',verse:'And shouldn’t I show concern for the great city of Nineveh? It has more than 120,000 people. They can’t tell right from wrong. Nineveh also has a lot of animals.',ref:'Jonah 4:11',btns:[{label:'🏠 Home',cls:'cream',fn:()=>go(TitleScene)},{label:'↻ Play Again',cls:'green',fn:()=>go(LEVELS[0].intro)}],credit:NIRV_NOTICE,sfx:'fanfare'}),2600)}},
  gpos(){return[G.W*.64-42,170]},
  update(dt){this.g=lerp(this.g,this.taps/this.N,dt*3);if(this.done&&Math.random()<dt*6)fx(rnd(20,G.W-20),rnd(40,100),6,{k:'star',up:20})},
  auto(dt){this.ac=(this.ac||0)+dt;if(this.ac<.5)return;this.ac=0;if(!this.done)this.tap(G.W/2,G.H/2)},
@@ -399,16 +403,16 @@ function seaPage(t,storm){D.bg('bg_storm',null,{dy:.6});D.tint('#0a1830',.1+.2*s
 // ---------- STORY ----------
 const pg=(text,drawFn)=>({text,draw:drawFn});
 const LEVELS=[
- {name:'Run to Joppa',scene:RunScene,ref:'Jonah 1:3',done:'You made it to the ship!',verse:'But Jonah rose up to flee unto Tarshish from the presence of the LORD, and went down to Joppa; and he found a ship going to Tarshish: so he paid the fare thereof, and went down into it, to go with them unto Tarshish from the presence of the LORD.',
+ {name:'Run to Joppa',scene:RunScene,ref:'Jonah 1:3',done:'You made it to the ship!',verse:'But Jonah ran away from the Lord. He headed for Tarshish. So he went down to the port of Joppa. There he found a ship that was going to Tarshish. He paid the fare and went on board. Then he sailed for Tarshish. He was running away from the Lord.',
   intro:()=>Story([pg('God said to Jonah: “Go to the great city of Nineveh and tell them about Me.”',t=>{D.bg('bg_hill',null,{dy:.3});godRays(t,G.W*.55,.08);jonah('jonah',G.W/2,172,98);D.vig(.3)}),
    pg('But Jonah did not want to go. He ran the other way, to the port of Joppa!',t=>{D.bg('bg_joppa',t*30);warm(t);jonah('run',G.W/2-30,168,74,{bob:0});D.vig(.3)})],RunScene)},
- {name:'Storm at Sea',scene:StormScene,ref:'Jonah 1:4',done:'You weathered the storm!',verse:'But the LORD sent out a great wind into the sea, and there was a mighty tempest in the sea, so that the ship was like to be broken.',
+ {name:'Storm at Sea',scene:StormScene,ref:'Jonah 1:4',done:'You weathered the storm!',verse:'But the Lord sent a strong wind over the Mediterranean Sea. A wild storm came up. It was so wild that the ship was in danger of breaking apart.',
   intro:()=>Story([pg('Jonah found a ship going to Tarshish and climbed aboard.',t=>{D.bg('bg_dock',null,{dy:.4});warm(t);D.vig(.3)}),pg('The ship sailed away… then God sent a great wind and a mighty storm!',t=>seaPage(t,Math.min(1,t*.4))),
    pg('The sailors were afraid. They threw the cargo into the sea to make the ship lighter.',t=>seaPage(t,1))],StormScene)},
- {name:'Inside the Great Fish',scene:BellyScene,ref:'Jonah 2:1',done:'God heard Jonah’s prayer!',verse:'Then Jonah prayed unto the LORD his God out of the fish’s belly,',
+ {name:'Inside the Great Fish',scene:BellyScene,ref:'Jonah 2:1',done:'God heard Jonah’s prayer!',verse:'From inside the fish Jonah prayed to the Lord his God.',
   intro:()=>Story([pg('Jonah told them: “Throw me into the sea.” Splash! But God had prepared a great fish…',t=>{D.bg('bg_fish',null,{dy:.4,zoom:1+t*.015});D.vig(.3)}),
    pg('Gulp! Jonah was in the belly of the fish three days and three nights. So he prayed.',t=>{D.bg('bg_belly',null,{dy:.45});warm(t,.12);jonah('pray',G.W/2,170,84,{glow:'rgba(255,240,180,.8)',gb:10});D.vig(.25)})],BellyScene)},
- {name:'Preach in Nineveh',scene:CityScene,ref:'Jonah 3:10',done:'Nineveh turned to God!',verse:'And God saw their works, that they turned from their evil way; and God repented of the evil, that he had said that he would do unto them; and he did it not.',
+ {name:'Preach in Nineveh',scene:CityScene,ref:'Jonah 3:10',done:'Nineveh turned to God!',verse:'God saw what they did. He saw that they stopped doing what was evil. So he took pity on them. He didn’t destroy them as he had said he would.',
   intro:()=>Story([pg('God told the fish to spit Jonah out onto dry land. Bleh! 🐋',t=>{D.bg('bg_beach',null,{dy:.5});jonah('jonah',G.W*.7,176,62);D.vig(.3)}),
    pg('This time Jonah obeyed God and went to Nineveh to preach!',t=>{const g=greyOf('bg_city'),r=bgRect('bg_city',{dy:.35});if(g)X.drawImage(g,r.x,r.y,r.w,r.h);jonah('preach',58,182,92);D.vig(.35)})],CityScene)}
 ];
